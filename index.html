@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Secure Login</title>
+<style>
+  :root{
+    --blur: 18px;
+    --overlay: rgba(240,240,255,0.20);
+    --hotspot-size: 28px;
+  }
+  html,body{
+    height:100%; margin:0;
+  }
+  body{
+    font-family: system-ui, sans-serif;
+    background: linear-gradient(120deg,#8ec5fc,#e0c3fc,#fcb69f,#ff9a9e,#a1c4fd,#c2ffd8);
+    background-size: 180% 180%;
+    animation: bgMove 12s ease-in-out infinite;
+    overflow:hidden;
+  }
+  @keyframes bgMove{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+  }
+  .blur-overlay{
+    position:fixed; inset:0;
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    background: var(--overlay);
+    z-index: 9999;
+  }
+  .hidden-input{
+    position: fixed;
+    right: 6px; bottom: 6px;
+    width: 1px; height: 1px;
+    opacity: 0;
+    z-index: 10001;
+    border: 0; outline: none; background: transparent;
+  }
+  .sr-only{
+    position:absolute; width:1px; height:1px; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0);
+  }
+  .hotspot{
+    position: fixed;
+    right: 6px; bottom: 6px;
+    width: var(--hotspot-size); height: var(--hotspot-size);
+    z-index: 10000;
+    background: transparent; border: none;
+  }
+  .watermark{
+    position: fixed; inset: 0;
+    display: grid; place-items: center;
+    color: rgba(255,255,255,0.65);
+    font-weight: 700;
+    text-transform: uppercase;
+    pointer-events: none;
+    mix-blend-mode: lighten;
+  }
+</style>
+</head>
+<body>
+
+<div class="watermark">Secure Area</div>
+<div class="blur-overlay" id="overlay"></div>
+<label for="pwd" class="sr-only">Enter Password</label>
+<input type="password" id="pwd" class="hidden-input" autocomplete="off" />
+<button class="hotspot" id="tap"></button>
+
+<script>
+async function sha256(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ======== CONFIG ========
+let PASS_HASH = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"; // "password"
+const SECRET_KEY = "masterkey123"; // इस key से password change mode खुलेगा
+
+const input = document.getElementById('pwd');
+document.getElementById('tap').addEventListener('click', ()=> input.focus());
+
+async function tryLogin(){
+  const val = input.value || "";
+  if(!val) return;
+  const inputHash = await sha256(val);
+  input.value = "";
+  
+  // ===== Password Change Mode =====
+  if(val === SECRET_KEY){
+    const newPass = prompt("Enter NEW password:");
+    if(newPass){
+      const newHash = await sha256(newPass);
+      PASS_HASH = newHash;
+      alert("New password hash:\n" + newHash + "\n\nअब इसे HTML में PASS_HASH में replace करो।");
+    }
+    return;
+  }
+
+  // ===== Normal Login =====
+  if(inputHash === PASS_HASH){
+    sessionStorage.setItem("loggedIn","true");
+    window.location.replace("a.html");
+  }
+}
+
+input.addEventListener('keydown', (e)=>{ if(e.key==="Enter") tryLogin(); });
+input.addEventListener('change', tryLogin);
+</script>
+
+</body>
+</html>

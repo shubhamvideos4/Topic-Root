@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protected Page</title>
+  <script>
+if (sessionStorage.getItem("loggedIn") !== "true") {
+    window.location.replace("index.html");
+}
+  
+ 
+  
+</script>
+<style>
+  body{
+    font-family: system-ui, sans-serif;
+    background: linear-gradient(135deg, #a1c4fd, #c2ffd8);
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  h1{
+    color: #333;
+  }
+  button{
+    background: #ff9a9e;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button:hover{
+    background: #fcb69f;
+  }
+  
+  
+  .start-link{
+  font-size: 22px;
+  color: #222;
+  cursor: pointer;
+  user-select: none;
+}
+  
+  
+  
+  
+</style>
+<script>
+// ====== Auto Login Check ======
+if (sessionStorage.getItem("loggedIn") !== "true") {
+    // User not logged in — send back to login page
+    window.location.replace("index.html");
+}
+</script>
+</head>
+<body>
+ 
+<h1>
+  <div id="start" class="start-link" title="Open next page">START</div>
+</h1>
+ 
+  
+  
+  
+<p>Only logged in users can see this page.</p>
+<button onclick="logout()">LogOut</button>
+
+<script>
+function logout(){
+    // Clear login status
+    sessionStorage.clear();
+    // Redirect to login page
+    window.location.replace("index.html");
+}
+  
+  
+  document.getElementById('start').addEventListener('click', function () {
+    
+    
+    ////////////next page file name
+    window.location.href = "desktopview.html"; 
+    
+    
+    
+    // same tab me internal page
+  // window.open("https://example.com", "_blank"); // (optional) nayi tab me external
+});
+  
+  
+  
+  
+</script>
+
+</body>
+</html>
